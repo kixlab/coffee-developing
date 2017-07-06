@@ -1,7 +1,10 @@
 import enum
+import uuid
+
 import Field
 
 class Coffee:
+    uuid = None
     __fields = []
     
     def __init__(self, prevCoffee = None):
@@ -11,8 +14,12 @@ class Coffee:
         self.__fields.append(Field.Field('Prime', int, 200))
 
         if prevCoffee != None:
+            self.uuid = prevCoffee.uuid
             for field in prevCoffee.__fields:
                 self.applyValue(field.getStatus())
+
+        else:
+            self.uuid = uuid.uuid4()
     
     def process(self):
         highestPriorityField = self.getHighestPriorityField()
@@ -56,5 +63,6 @@ class Coffee:
                         print("WrongTypeException : Expected", field.getType(), "| Input", type(msg[1]))
 
     def printStatus(self):
+        print('UUID :', self.uuid)
         for field in self.__fields:
             field.printStatus()

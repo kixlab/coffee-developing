@@ -50,5 +50,5 @@ class Field:
         print(self.name, '=', self.__value)
         
     def printQuestion(self):
-        print('Need to fill :', self.name, 'with type', self.__type)
+        print('(', self.name, '-', self.__type, ')')
         
