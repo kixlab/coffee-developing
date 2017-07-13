@@ -15,7 +15,7 @@ class Main():
 		while True:
 			if self.cursor != -1:
 				print('> Recommend to fill - ', end = '')
-				self.stack[cursor].getHighestPriorityField().printQuestion()
+				self.__current().getHighestPriorityField().printQuestion()
 
 			msg = input('INPUT : ')
 			if msg.lower().find('service_start') != -1:
@@ -34,7 +34,7 @@ class Main():
 				self.cursor_move(1)
 			elif msg.lower().find('query') != -1:
 				# Not applied for mainstream yet
-				resultJson = coffeeLUIS.getJson()
+				resultJson = self.coffeeLUIS.getJson()
 				query = resultJson.get('query')
 				topScoringIntent = resultJson.get('topScoringIntent')
 				entities = resultJson.get('entities')
@@ -50,10 +50,10 @@ class Main():
 		if self.__notFilled() == -1:
 			print('Coffee not started')
 		else:
-			current_coffee = Coffee(stack[cursor])
+			current_coffee = Coffee(self.__current())
 			current_coffee.applyValue()
 			self.stack.append(current_coffee)
-			cursor += 1
+			self.cursor_move(1) # TODO : Change
 			print('Current Coffee state :')
 			current_coffee.printStatus()
 
@@ -79,7 +79,7 @@ class Main():
 			i += 1
 
 	def cursor_move(self, d):
-		if __notFilled():
+		if self.__notFilled():
 			print('Coffee not started')
 		elif self.cursor + d < 0 or self.cursor + d >= len(self.stack):
 			print('Moved cursor out of range')
@@ -91,7 +91,7 @@ class Main():
 
 	def __current(self):
 		# TODO : Exception should be managed at here?
-		return self.stack[cursor]
+		return self.stack[self.cursor]
 
 	# TODO IDEA : manage cursor == -1 case with other procedure
 				
