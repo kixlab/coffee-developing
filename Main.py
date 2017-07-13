@@ -81,7 +81,7 @@ class Main():
 	def cursor_move(self, d):
 		if __notFilled():
 			print('Coffee not started')
-		elif self.cursor + d < 0 || self.cursor + d >= len(self.stack):
+		elif self.cursor + d < 0 or self.cursor + d >= len(self.stack):
 			print('Moved cursor out of range')
 		else:
 			 self.cursor += d
