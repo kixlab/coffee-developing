@@ -1,5 +1,5 @@
 How to run :
 
-'''sh
+```sh
 $ python3 Main.py
 ```
