@@ -6,15 +6,17 @@ types = [enum.Enum, int, bool, str] # Allowed types
 
 class Field:
     name = ''
+    nameKR = ''
     __priority = 0 # Default is 0. Should not be changed
     __type = None
     __value = None
     
-    def __init__(self, name, typeDef, priority = 0):
+    def __init__(self, name, nameKR, typeDef, priority = 0):
         if not typeDef in types:
             print('WrongTypeError :', typeDef)
         else:
             self.name = name
+            self.nameKR = nameKR
             self.__priority = priority
             self.__type = typeDef
 
@@ -51,4 +53,28 @@ class Field:
         
     def printQuestion(self):
         print('(', self.name, '-', self.__type, ')')
-        
+
+    # MAYBE TEMPORARY FUNCTIONS
+
+    def printQuestionKR(self):
+        print(self.nameKR + self.getAttach(), self.getQuestion(), '할까요?')
+
+    def getAttach(self): # Might moved to Util.py
+        bottomEmpty = (ord(self.nameKR[-1]) % 28 == 16)
+        if bottomEmpty:
+            return '는'
+        else:
+            return '은'
+
+    def getQuestion(self):
+        if self.__type == enum.Enum:
+            return '어떤 걸로'
+        elif self.__type == int:
+            return '얼마나'
+        elif self.__type == bool:
+            return '어떤 걸로'
+        elif self.__type == str:
+            return '어떤 걸로'
+        else:
+            print('TYPE-ERROR on Field.getQuestion()')
+            return None # ERROR CASE

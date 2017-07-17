@@ -9,9 +9,9 @@ class Coffee:
 	
 	def __init__(self, prevCoffee = None):
 		self.__fields = []
-		self.__fields.append(Field.Field('Type', str, 200))
-		self.__fields.append(Field.Field('Sugar', int, 200))
-		self.__fields.append(Field.Field('Prime', int, 200))
+		self.__fields.append(Field.Field('Type', '커피 종류', str, 200))
+		self.__fields.append(Field.Field('Sugar', '설탕', int, 200))
+		self.__fields.append(Field.Field('Prime', '프림', int, 200))
 
 		if prevCoffee != None:
 			self.uuid = prevCoffee.uuid

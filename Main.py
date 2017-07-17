@@ -1,6 +1,8 @@
 from Coffee import Coffee
 from LUISconnector import LUISconnector
 
+intentThreshold = 0.5
+
 class Main():
 	cursor = None
 	stack = None
@@ -13,49 +15,71 @@ class Main():
 
 	def run(self):
 		while True:
-			if self.cursor != -1:
-				print('> Recommend to fill - ', end = '')
-				self.__current().getHighestPriorityField().printQuestion()
+			if not self.__notFilled():
+				print('ASK > ', end = '')
+				self.__current().getHighestPriorityField().printQuestionKR()
 
 			msg = input('INPUT : ')
-			if msg.lower().find('service_start') != -1:
-				self.service_start() # Starting service by creating new coffee argument
-			elif msg.lower().find('set_field') != -1:
-				self.set_field()
-			elif msg.lower().find('recommend') != -1:
-				self.recommend()
-			elif msg.lower().find('print') != -1:
-				self.print()
-			elif msg.lower().find('stack') != -1:
-				self.print_stack()
-			elif msg.lower().find('back') != -1:
-				self.cursor_move(-1)
-			elif msg.lower().find('front') != -1:
-				self.cursor_move(1)
-			elif msg.lower().find('query') != -1:
+			if self.msgFind(msg, 'query'):
 				# Not applied for mainstream yet
 				resultJson = self.coffeeLUIS.getJson()
 				query = resultJson.get('query')
 				topScoringIntent = resultJson.get('topScoringIntent')
+				topIntent = topScoringIntent.get('intent')
+				topScore = topScoringIntent.get('score')
+				if topScore < intentThreshold:
+					print("WARNING : Not enough intent score :", topScore)
+					pass
+
 				entities = resultJson.get('entities')
+
+				if topIntent == '':
+					pass
+
 				print(query)
 				print(topScoringIntent)
+				print('Query-Intent', topScoringIntent.get('intent'))
+				print('Query-Intent-Type', type(topScoringIntent.get('intent')))
+				print('Query-Score', topScoringIntent.get('score'))
+				print('Query-Score-Type', type(topScoringIntent.get('score')))
 				print(entities)
+
+
+			if self.msgFind(msg, 'service_start'):
+				self.service_start() # Starting service by creating new coffee argument
+			elif self.msgFind(msg, 'set_field'):
+				self.set_field()
+			elif self.msgFind(msg, 'recommend'):
+				self.recommend()
+			elif self.msgFind(msg, 'print'):
+				self.print()
+			elif self.msgFind(msg, 'stack'):
+				self.print_stack()
+			elif self.msgFind(msg, 'back'):
+				self.cursor_move(-1)
+			elif self.msgFind(msg, 'front'):
+				self.cursor_move(1)
+			
+	def msgFind(self, msg, keyword):
+		return msg.lower().find(keyword) != -1
+
+	### Functions for each works
 
 	def service_start(self):
 		self.stack.append(Coffee())
-		self.cursor += 1
+		self.cursor = len(self.stack)-1 # Automatically move to top
 
 	def set_field(self):
-		if self.__notFilled() == -1:
-			print('Coffee not started')
-		else:
-			current_coffee = Coffee(self.__current())
-			current_coffee.applyValue()
-			self.stack.append(current_coffee)
-			self.cursor_move(1) # TODO : Change
-			print('Current Coffee state :')
-			current_coffee.printStatus()
+		if self.__notFilled():
+			print('Coffee not started - Set_field')
+			return # Case : cursor = -1
+
+		current_coffee = Coffee(self.__current())
+		current_coffee.applyValue()
+		self.stack.append(current_coffee)
+		self.cursor_move(1) # TODO : Change
+		print('Current Coffee state :')
+		current_coffee.printStatus()
 
 	def recommend(self):
 		if self.__notFilled():
@@ -90,6 +114,9 @@ class Main():
 		return self.cursor == -1
 
 	def __current(self):
+		if self.__notFilled():
+			print('Coffee not started')
+			return None
 		# TODO : Exception should be managed at here?
 		return self.stack[self.cursor]
 
