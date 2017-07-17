@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 import enum
 import uuid
 
@@ -9,9 +11,11 @@ class Coffee:
 	
 	def __init__(self, prevCoffee = None):
 		self.__fields = []
-		self.__fields.append(Field.Field('Type', '커피 종류', str, 200))
-		self.__fields.append(Field.Field('Sugar', '설탕', int, 200))
-		self.__fields.append(Field.Field('Prime', '프림', int, 200))
+		self.__fields.append(Field.Field('Coffee_Fields::Coffee_Kind', '커피 종류', str, 200))
+		self.__fields.append(Field.Field('Syrup', '시럽', int, 200)) # MAX ?
+		self.__fields.append(Field.Field('Shot', '샷 추가', int, 200)) # MAX 3?
+		self.__fields.append(Field.Field('Ice', '얼음', bool, 200))
+		self.__fields.append(Field.Field('Takeout', '테이크아웃', bool, 200))
 
 		if prevCoffee != None:
 			self.uuid = prevCoffee.uuid
@@ -46,7 +50,7 @@ class Coffee:
 
 	# get "field + val, divided with one space"
 	def applyValue(self, msg = None):
-		if msg == None:
+		if msg == None or msg == '':
 			msg = input('VALUE INPUT : ')
 		msg = msg.split()
 		if len(msg) < 2:
@@ -58,7 +62,7 @@ class Coffee:
 			for field in self.__fields:
 				if field.name == msg[0]:
 					try:
-						field.setValue(field.getType()(msg[1]))
+						field.setValue(field.getType()(''.join(msg[1:])))
 					except Exception as ex:
 						print("WrongTypeException : Expected", field.getType(), "| Input", type(msg[1]))
 

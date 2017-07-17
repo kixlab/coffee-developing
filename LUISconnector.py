@@ -38,9 +38,6 @@ class LUISconnector:
 		url = urllib.request.urlopen(self.__link + urllib.parse.quote(query))
 		resultJson = json.loads(url.read())
 
-		print(resultJson)
+		# print(resultJson)
 
 		return resultJson
-
-
-

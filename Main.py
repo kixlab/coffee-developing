@@ -1,3 +1,4 @@
+from __future__ import print_function
 from Coffee import Coffee
 from LUISconnector import LUISconnector
 
@@ -15,53 +16,75 @@ class Main():
 
 	def run(self):
 		while True:
-			if not self.__notFilled():
-				print('ASK > ', end = '')
-				self.__current().getHighestPriorityField().printQuestionKR()
+			self.react()
 
-			msg = input('INPUT : ')
-			if self.msgFind(msg, 'query'):
-				# Not applied for mainstream yet
-				resultJson = self.coffeeLUIS.getJson()
-				query = resultJson.get('query')
-				topScoringIntent = resultJson.get('topScoringIntent')
-				topIntent = topScoringIntent.get('intent')
-				topScore = topScoringIntent.get('score')
-				if topScore < intentThreshold:
-					print("WARNING : Not enough intent score :", topScore)
-					pass
+	def react(self):
+		if not self.__notFilled():
+			print('ASK > ', end = '')
+			self.__current().getHighestPriorityField().printQuestionKR()
 
-				entities = resultJson.get('entities')
+		msg = input('INPUT : ')
+		msg_field = None
+		if self.msgFind(msg, 'query'):
+			# Not applied for mainstream yet
+			resultJson = self.coffeeLUIS.getJson()
 
-				if topIntent == '':
-					pass
+			query = resultJson.get('query')
+			topScoringIntent = resultJson.get('topScoringIntent')
 
-				print(query)
-				print(topScoringIntent)
-				print('Query-Intent', topScoringIntent.get('intent'))
-				print('Query-Intent-Type', type(topScoringIntent.get('intent')))
-				print('Query-Score', topScoringIntent.get('score'))
-				print('Query-Score-Type', type(topScoringIntent.get('score')))
-				print(entities)
+			if topScoringIntent == None:
+				print('No topScoringIntent')
+				return
 
+			topIntent = topScoringIntent.get('intent')
+			topScore = topScoringIntent.get('score')
+			if topScore < intentThreshold:
+				print("WARNING : Not enough intent score :", topScore * 100) # 0-100 Scale.
+				return
 
-			if self.msgFind(msg, 'service_start'):
-				self.service_start() # Starting service by creating new coffee argument
-			elif self.msgFind(msg, 'set_field'):
-				self.set_field()
-			elif self.msgFind(msg, 'recommend'):
-				self.recommend()
-			elif self.msgFind(msg, 'print'):
-				self.print()
-			elif self.msgFind(msg, 'stack'):
-				self.print_stack()
-			elif self.msgFind(msg, 'back'):
-				self.cursor_move(-1)
-			elif self.msgFind(msg, 'front'):
-				self.cursor_move(1)
+			entities = resultJson.get('entities')
+
+			msg = topIntent # as next message
+			msg_field = ''
+
+			#### TODO - CHANGE HERE ####
+			for entity in entities:
+				msg_field = msg_field + self.entityAnalysis(entity)
+
+		if self.msgFind(msg, 'coffee_service'):
+			self.service_start() # Starting service by creating new coffee argument
+		elif self.msgFind(msg, 'set_field'):
+			self.set_field(msg_field)
+		elif self.msgFind(msg, 'recommend'):
+			self.recommend()
+		elif self.msgFind(msg, 'print'):
+			self.print()
+		elif self.msgFind(msg, 'stack'):
+			self.print_stack()
+		elif self.msgFind(msg, 'back'):
+			self.cursor_move(-1)
+		elif self.msgFind(msg, 'front'):
+			self.cursor_move(1)
+		else:
+			print(msg, 'is not covered order.')
 			
 	def msgFind(self, msg, keyword):
 		return msg.lower().find(keyword) != -1
+
+	def entityAnalysis(self, entityDict):
+		entity = entityDict.get('entity')
+		entityType = entityDict.get('type')
+		score = entityDict.get('score')
+
+		if score < intentThreshold:
+			print("WARNING : Not enough intent score :", entity, entitiType, score * 100) # 0-100 Scale.
+			return ''
+		else:
+			return entityType + ' ' + entity
+
+
+		# startIndex and endIndex?
+
 
 	### Functions for each works
 
@@ -69,13 +92,13 @@ class Main():
 		self.stack.append(Coffee())
 		self.cursor = len(self.stack)-1 # Automatically move to top
 
-	def set_field(self):
+	def set_field(self, msg = None):
 		if self.__notFilled():
 			print('Coffee not started - Set_field')
 			return # Case : cursor = -1
 
 		current_coffee = Coffee(self.__current())
-		current_coffee.applyValue()
+		current_coffee.applyValue(msg)
 		self.stack.append(current_coffee)
 		self.cursor_move(1) # TODO : Change
 		print('Current Coffee state :')

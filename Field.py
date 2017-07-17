@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 import enum
 
 types = [enum.Enum, int, bool, str] # Allowed types
@@ -72,7 +74,7 @@ class Field:
         elif self.__type == int:
             return '얼마나'
         elif self.__type == bool:
-            return '어떤 걸로'
+            return '어떻'
         elif self.__type == str:
             return '어떤 걸로'
         else:
