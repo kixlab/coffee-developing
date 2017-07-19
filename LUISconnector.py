@@ -33,7 +33,7 @@ class LUISconnector:
 		if query == None:
 			query = input('> QUERY : ')
 
-		print('Query Message : ', query)
+		print('Query Message :', query)
 
 		url = urllib.request.urlopen(self.__link + urllib.parse.quote(query))
 		resultJson = json.loads(url.read())

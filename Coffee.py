@@ -12,7 +12,7 @@ class Coffee:
 	def __init__(self, prevCoffee = None):
 		self.__fields = []
 		self.__fields.append(Field.Field('Coffee_Fields::Coffee_Kind', '커피 종류', str, 200))
-		self.__fields.append(Field.Field('Syrup', '시럽', int, 200)) # MAX ?
+		self.__fields.append(Field.Field('Syrup', '시럽', bool, 200)) # MAX ?
 		self.__fields.append(Field.Field('Shot', '샷 추가', int, 200)) # MAX 3?
 		self.__fields.append(Field.Field('Ice', '얼음', bool, 200))
 		self.__fields.append(Field.Field('Takeout', '테이크아웃', bool, 200))
@@ -51,7 +51,10 @@ class Coffee:
 	# get "field + val, divided with one space"
 	def applyValue(self, msg = None):
 		if msg == None or msg == '':
-			msg = input('VALUE INPUT : ')
+			#msg = input('VALUE INPUT : ')
+			print('No arguments to set :(')
+			return
+
 		msg = msg.split()
 		if len(msg) < 2:
 			print("Not enough parameters :", len(msg))

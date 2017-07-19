@@ -59,7 +59,7 @@ class Field:
     # MAYBE TEMPORARY FUNCTIONS
 
     def printQuestionKR(self):
-        print(self.nameKR + self.getAttach(), self.getQuestion(), '할까요?')
+        return self.nameKR + self.getAttach() + ' ' + self.getQuestion() + '?'
 
     def getAttach(self): # Might moved to Util.py
         bottomEmpty = (ord(self.nameKR[-1]) % 28 == 16)
@@ -70,13 +70,13 @@ class Field:
 
     def getQuestion(self):
         if self.__type == enum.Enum:
-            return '어떤 걸로'
+            return '어떤 걸로 할까요'
         elif self.__type == int:
-            return '얼마나'
+            return '얼마나 할까요'
         elif self.__type == bool:
-            return '어떻'
+            return '넣어 드릴까요'
         elif self.__type == str:
-            return '어떤 걸로'
+            return '어떤 걸로 할까요'
         else:
             print('TYPE-ERROR on Field.getQuestion()')
             return None # ERROR CASE
