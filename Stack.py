@@ -2,7 +2,7 @@
 from Coffee import Coffee
 from LUISconnector import LUISconnector
 
-intentThreshold = 0.2
+intentThreshold = 0.1
 
 class Stack():
 	cursor = None
@@ -20,11 +20,6 @@ class Stack():
 
 	def react(self, msg = None):
 		reply = ''
-
-		if not self.__notFilled():
-			question = self.__current().getHighestPriorityField().printQuestionKR()
-			print('ASK > ' + question)
-			reply = reply + 'ASK > ' + question
 		
 		if msg == None:
 			msg = input('> QUERY : ')
@@ -44,6 +39,7 @@ class Stack():
 		topScore = topScoringIntent.get('score')
 		if topScore < intentThreshold:
 			print("WARNING : Not enough intent score :", topScore * 100) # 0-100 Scale.
+			reply = reply + "Cannot understand intent [" + topIntent + ", " + str(topScore * 100) + "]\n"
 			return
 
 		entities = resultJson.get('entities')
@@ -58,6 +54,12 @@ class Stack():
 
 		reply = reply + '\n' + msg + '\n' + args
 		self.command(msg, args)
+
+		# Moved Recommendation order.
+		if not self.__notFilled():
+			question = self.__current().getHighestPriorityField().printQuestionKR()
+			print('ASK > ' + question)
+			reply = reply + 'ASK > ' + question
 
 		return reply
 

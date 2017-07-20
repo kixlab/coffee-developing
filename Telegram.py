@@ -44,7 +44,7 @@ class TelegramBot:
 			return
 		print('ERROR : bot is not okay')
 
-	def getMessageStack(self):
+	def reply(self): # Reply is included
 		args = []
 		if self.prevOffset != None:
 			args = ['?offset=', (self.prevOffset+1)]
@@ -58,13 +58,34 @@ class TelegramBot:
 			senderNameLast = msg.get('message').get('from').get('last_name')
 			text = msg.get('message').get('text')
 			print("Message info :", senderID, senderNameFirst, senderNameLast, text)
+
 			self.msgStack.append(msg)
 			self.prevOffset = msg.get('update_id')
-			a = self.memory.react(text)
+
+			if text == '/start':
+				text = '커피 타줘'
+
+			if text == '/quit':
+				self.sendMessage(senderID, '서비스를 종료합니다.')
+				return 1 # Code for quit
+
 			self.sendMessage(senderID, self.memory.react(text))
 
-	def sendMessage(self, userID, msg):
-		args = ['?chat_id=', userID, '&text=', urllib.parse.quote(msg)]
+		return 0
 
-		resultJson = self.react('sendMessage', args)
-		
+	def sendMessage(self, userID, msg):
+		args = []
+		if msg != None:
+			args = ['?chat_id=', userID, '&text=', urllib.parse.quote(msg)]
+
+			resultJson = self.react('sendMessage', args)
+
+	def endProcedure(self):
+		# To clear stack....
+		args = []
+		if self.prevOffset != None:
+			args = ['?offset=', (self.prevOffset+1)]
+
+		self.react('getUpdates', args)
+
+		print('Buffer cleared.')
