@@ -4,17 +4,19 @@ import time
 bot = TelegramBot()
 
 print('Left messages on buffer :')
-bot.reply()
+bot.clearBuffer()
 
 print('Running bot....')
+bot.ping()
+# Starting part
+
 while True:
-	bot.ping()
 	code = bot.reply()
 	if code == 0: # Code for running
 		pass
 	if code == 1: # Code for '/quit', Exit.
 		print('Quit order inserted')
-		bot.endProcedure
+		bot.clearBuffer()
 		break
 	time.sleep(3)
 

@@ -2,75 +2,99 @@
 from Coffee import Coffee
 from LUISconnector import LUISconnector
 
+import re
+
 intentThreshold = 0.1
 
 class Stack():
 	cursor = None
 	stack = None
 	coffeeLUIS = None
+	__msg = '' # Value for save return message
 
 	def __init__(self):
 		self.cursor = -1
 		self.stack = []
-		self.coffeeLUIS = LUISconnector()
+		self.coffeeLUIS = LUISconnector(2)
 
 	def run(self): # For stand-alone
 		while True:
 			self.react()
 
 	def react(self, msg = None):
-		reply = ''
-		
-		if msg == None:
+		if msg == None: # For console [ MainStack.py ]
 			msg = input('> QUERY : ')
 
-		args = None
-		# Not applied for mainstream yet
+		# Command for debugging...
+		block = msg.split()
+
+		if block[0] in ['coffee_service', 'set_field', 'recommend', 'print', 'stack', 'back', 'front']:
+			self.run_intent(msg)
+			return
+		# Commands end
+
 		resultJson = self.coffeeLUIS.getJson(msg)
-
-		query = resultJson.get('query')
-		topScoringIntent = resultJson.get('topScoringIntent')
-
-		if topScoringIntent == None:
-			print('No topScoringIntent')
-			return
-
-		topIntent = topScoringIntent.get('intent')
-		topScore = topScoringIntent.get('score')
-		if topScore < intentThreshold:
-			print("WARNING : Not enough intent score :", topScore * 100) # 0-100 Scale.
-			reply = reply + "Cannot understand intent [" + topIntent + ", " + str(topScore * 100) + "]\n"
-			return
-
 		entities = resultJson.get('entities')
+		self.run_entity(entities)
 
-		msg = topIntent # as next message
-		args = ''
-
-		#### TODO - CHANGE HERE ####
-		for entity in entities:
-			args = args + self.entityAnalysis(entity)
-			# Problem - multiple-entity should be concerned later.
-
-		reply = reply + '\n' + msg + '\n' + args
-		self.command(msg, args)
+		if self.__current().isFilled(): # Finished
+			self.__addMsg('커피를 다음과 같이 주문합니다.')
+			self.__addMsg(self.__current().getStatus())
+			return self.__getMsg() # And Return.
 
 		# Moved Recommendation order.
-		if not self.__notFilled():
+		if not self.__notStarted():
 			question = self.__current().getHighestPriorityField().printQuestionKR()
-			print('ASK > ' + question)
-			reply = reply + 'ASK > ' + question
+			print(question)
+			self.__addMsg(question)
 
-		return reply
+		return self.__getMsg()
 
-	def command(self, msg = None, args = None):
+	def parseEntity(self, entity):
+		# Return as list/tuple form. [Object, FieldName, Value, others...]
+		result = entity.get('type').split(':')
+		result.append(entity.get('entity'))
+		if '' in result:
+			result.remove('') # To avoid :: case
+
+		# Temporary coverage for shot
+		if result[0] == result[2]: # ['Coffee', 'Shot', 'Coffee', 'Shot', 'Two', '두 번 ']
+			result.remove(result[2])
+			result.remove(result[2]) # [3] goes to [2]
+		return result
+
+	def run_entity(self, entities):
+		current = Coffee(self.__current()) # Including starting Coffee when not started
+
+		print('-- ENTITIES LIST --')
+		for entity in entities:
+			entityPath = self.parseEntity(entity)
+			print(entityPath)
+			# TODO - If first element is not matching, goto lower part
+			if self.getClassName(current) == entityPath[0]:
+				current.setField(entityPath)
+				pass # entityPath[1]
+			else:
+				# Go back repeatly
+				pass # Currently inimplemented
+
+		print('-- ENTITIES LIST END --')
+		self.stack.append(current)
+		self.cursor_move(1) # TODO : Change
+		print('Current Coffee state :')
+		current.printStatus()
+
+	def run_intent(self, msg = None, block = None):
 		if msg == None:
 			msg = input('INPUT : ')
+
+		if block == None:
+			block = msg.split()
 
 		if self.msgFind(msg, 'coffee_service'):
 			self.service_start() # Starting service by creating new coffee argument
 		elif self.msgFind(msg, 'set_field'):
-			self.set_field(args)
+			self.set_field(block)
 		elif self.msgFind(msg, 'recommend'):
 			self.recommend()
 		elif self.msgFind(msg, 'print'):
@@ -81,54 +105,59 @@ class Stack():
 			self.cursor_move(-1)
 		elif self.msgFind(msg, 'front'):
 			self.cursor_move(1)
+		elif self.msgFind(msg, 'None'):
+			print('Error : Incomprehensible order. [None]')
+			return 'Error : Incomprehensible order. [None]'
+
 		else:
 			print(msg, 'is not covered order.')
 			
 	def msgFind(self, msg, keyword):
 		return msg.lower().find(keyword) != -1
 
-	def entityAnalysis(self, entityDict):
-		entity = entityDict.get('entity')
-		entityType = entityDict.get('type')
-		score = entityDict.get('score')
-
-		if score < intentThreshold:
-			print("WARNING : Not enough intent score :", entity, entitiType, score * 100) # 0-100 Scale.
-			return ''
-		else:
-			return entityType + ' ' + entity + '\n'
-
-
-		# startIndex and endIndex?
-
+	def getClassName(self, obj):
+		# From "<class 'Coffee.Coffee'>" to Coffee
+		return re.split('\'|\.', str(type(obj)))[2]
+		# Split Result : ['<class ', 'Coffee', 'Coffee', '>']
 
 	### Functions for each works
 
 	def service_start(self):
 		self.stack.append(Coffee())
+		self.__addMsg('새 커피를 주문합니다.') # Message for new Coffee
 		self.cursor = len(self.stack)-1 # Automatically move to top
 
-	def set_field(self, msg = None):
-		if self.__notFilled():
-			print('Coffee not started - Set_field')
-			return # Case : cursor = -1
+	def set_field(self, block = None):
+		if self.__notStarted():
+			self.service_start()
 
-		current_coffee = Coffee(self.__current())
-		current_coffee.applyValue(msg)
-		self.stack.append(current_coffee)
-		self.cursor_move(1) # TODO : Change
-		print('Current Coffee state :')
-		current_coffee.printStatus()
+		if len(block) == 1:
+			print('No arguments - set_field')
+
+		else:
+			current_coffee = Coffee(self.__current())
+
+			arg = ['Coffee']
+			for elem in block[1:]:
+				arg.append(elem)
+				if len(arg) == 3:
+					current_coffee.setField(arg)
+					arg = ['Coffee']
+
+			self.stack.append(current_coffee)
+			self.cursor_move(1) # TODO : Change
+			print('Current Coffee state :')
+			current_coffee.printStatus()
 
 	def recommend(self):
-		if self.__notFilled():
+		if self.__notStarted():
 			print('Coffee not started - Recommend')
 		else:
 			print('Recommend about...')
 			self.__current().getHighestPriorityField().printQuestion()
 
 	def print(self):
-		if self.__notFilled():
+		if self.__notStarted():
 			print('Coffee not started')
 		else:
 			self.__current().printStatus()
@@ -142,21 +171,30 @@ class Stack():
 			i += 1
 
 	def cursor_move(self, d):
-		if self.__notFilled():
+		if self.__notStarted():
 			print('Coffee not started')
 		elif self.cursor + d < 0 or self.cursor + d >= len(self.stack):
 			print('Moved cursor out of range')
 		else:
 			 self.cursor += d
 
-	def __notFilled(self):
+	def __notStarted(self):
 		return self.cursor == -1
 
 	def __current(self):
-		if self.__notFilled():
-			print('Coffee not started')
-			return None
+		if self.__notStarted():
+			print('Coffee not started. Create new Coffee')
+			self.service_start()
+			
 		# TODO : Exception should be managed at here?
 		return self.stack[self.cursor]
+
+	def __addMsg(self, text):
+		self.__msg += str(text) + '\n'
+
+	def __getMsg(self):
+		tmp = self.__msg
+		self.__msg = ''
+		return tmp
 
 	# TODO IDEA : manage cursor == -1 case with other procedure

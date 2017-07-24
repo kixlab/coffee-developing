@@ -19,8 +19,11 @@ class TelegramBot:
 
 	def order(self, order, args = []):
 		link = apiLink + str(order)
+		con = '?'
 		for arg in args:
-			link = link + str(arg) # arg should include divisor.
+			if arg[1] != '':
+				link = link + con + str(arg[0]) + '=' + str(arg[1]) # arg should include divisor.
+				con = '&'
 		return link
 
 	def react(self, order, args = []):
@@ -47,7 +50,7 @@ class TelegramBot:
 	def reply(self): # Reply is included
 		args = []
 		if self.prevOffset != None:
-			args = ['?offset=', (self.prevOffset+1)]
+			args = [['offset', (self.prevOffset+1)]]
 
 		resultJson = self.react('getUpdates', args)
 
@@ -63,28 +66,36 @@ class TelegramBot:
 			self.prevOffset = msg.get('update_id')
 
 			if text == '/start':
-				text = '커피 타줘'
+				self.memory.service_start() # Forcefully start.
 
 			if text == '/quit':
 				self.sendMessage(senderID, '서비스를 종료합니다.')
 				return 1 # Code for quit
 
-			self.sendMessage(senderID, self.memory.react(text))
+			reply = self.memory.react(text)
+			self.sendMessage(senderID, reply)
+
+			if reply != None:
+				if reply.find('커피를 다음과 같이 주문합니다.') != -1: # 종료일때.
+					self.sendMessage(senderID, '커피 주문을 완료하여 서비스를 종료하겠습니다.')
+					return 1 # Code for quit. At next modification, remove all same uuid case in stack.
 
 		return 0
 
 	def sendMessage(self, userID, msg):
 		args = []
-		if msg != None:
-			args = ['?chat_id=', userID, '&text=', urllib.parse.quote(msg)]
+		if msg == None or msg == '':
+			print('Tried to send empty message.')
+		else:
+			args = [['chat_id', userID], ['text', urllib.parse.quote(msg)]]
 
 			resultJson = self.react('sendMessage', args)
 
-	def endProcedure(self):
+	def clearBuffer(self):
 		# To clear stack....
 		args = []
 		if self.prevOffset != None:
-			args = ['?offset=', (self.prevOffset+1)]
+			args = [['offset', (self.prevOffset+1)]]
 
 		self.react('getUpdates', args)
 

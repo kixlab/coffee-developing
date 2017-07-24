@@ -2,7 +2,8 @@ import urllib.request
 import urllib.parse
 import json
 
-linkCoffee = "https://westus.api.cognitive.microsoft.com/luis/v2.0/apps/b17f3e2d-8222-45c1-a51e-300d12dead2d?subscription-key=99632d6d302c405f8ff27c28ffc7d8d7&staging=true&verbose=true&timezoneOffset=0&q="
+linkCoffee1 = "https://westus.api.cognitive.microsoft.com/luis/v2.0/apps/b17f3e2d-8222-45c1-a51e-300d12dead2d?subscription-key=99632d6d302c405f8ff27c28ffc7d8d7&verbose=true&timezoneOffset=0&q="
+linkCoffee2 = "https://westus.api.cognitive.microsoft.com/luis/v2.0/apps/b17f3e2d-8222-45c1-a51e-300d12dead2d?subscription-key=99632d6d302c405f8ff27c28ffc7d8d7&staging=true&timezoneOffset=0&verbose=true&q="
 '''
 query = input("QUERY : ")
 print(query)
@@ -26,8 +27,11 @@ print(type(entities)) # list
 class LUISconnector:
 	__link = ''
 
-	def __init__(self, link = linkCoffee):
-		self.__link = link
+	def __init__(self, version = 1):
+		if version == 2:
+			self.__link = linkCoffee2
+		else: # version 1 or exceptional cases
+			self.__link = linkCoffee1
 
 	def getJson(self, query = None):
 		if query == None:

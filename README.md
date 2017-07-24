@@ -14,3 +14,9 @@ B. Test for stack structure
 ```sh
 $ python3 MainStack.py
 ```
+- During query input, some texts (coffee_service, set_field, recommend, print, stack, back, front) are used as commands.
+
+Other note :
+
+Currently, "field-set alert message" is unimplemented.
+User should send one message to use this program. (Because sender id cannot obtained before message receiving...)
