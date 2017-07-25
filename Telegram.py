@@ -14,6 +14,10 @@ class TelegramBot:
 	msgStack = []
 	memory = Stack()
 
+	# variables of KJ
+	rep = None
+	lst = ["포장",'우유','샷','시럽','아이스','커피']
+
 	def __init__(self):
 		pass
 
@@ -72,7 +76,19 @@ class TelegramBot:
 				self.sendMessage(senderID, '서비스를 종료합니다.')
 				return 1 # Code for quit
 
+			# modified by KJ
+			if self.rep:
+				for elm in self.lst:
+					if elm in self.rep:
+						if elm not in text:
+							text = elm+" "+text
+							break
+
 			reply = self.memory.react(text)
+
+			# modified by KJ
+			self.rep = reply
+
 			self.sendMessage(senderID, reply)
 
 			if reply != None:
