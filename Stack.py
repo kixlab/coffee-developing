@@ -5,6 +5,7 @@ from LUISconnector import LUISconnector
 import re
 
 intentThreshold = 0.1
+commands = ['coffee_service', 'set_field', 'recommend', 'print', 'stack', 'back', 'front']
 
 class Stack():
 	cursor = None
@@ -28,7 +29,7 @@ class Stack():
 		# Command for debugging...
 		block = msg.split()
 
-		if block[0] in ['coffee_service', 'set_field', 'recommend', 'print', 'stack', 'back', 'front']:
+		if block[0] in commands:
 			self.run_intent(msg)
 			return
 		# Commands end
