@@ -1,4 +1,4 @@
-from Telegram import TelegramBot
+from module.Telegram import TelegramBot
 
 bot = TelegramBot()
 bot.ping()

@@ -1,6 +1,5 @@
-#from __future__ import print_function
-from Coffee import Coffee
-from LUISconnector import LUISconnector
+from .Coffee import Coffee
+from .LUISconnector import LUISconnector
 
 import re
 

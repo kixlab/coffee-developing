@@ -1,0 +1,49 @@
+{
+	"General": {
+		"Explanation": "For general informations",
+		"Fields": {
+			"Name": {}
+		}
+	},
+	"Coffee": {
+		"Explanation": "About coffee ordering",
+		"Fields": {
+			"Amount": {
+				"QuestionKR" : "몇 컵 해드릴까요",
+				"Type" : "int",
+				"Priority" : 200
+			},
+			"Cup_Type": {
+				"QuestionKR" : "포장해 드릴까요",
+				"ReplyExample" : "먹고갈꺼에요 / 들고갈게요",
+				"Type" : "str",
+				"Priority" : 200
+			},
+			"Milk": {
+				"QuestionKR" : "우유 넣어드릴까요",
+				"ReplyExample" : "우유 빼줘 / 우유 넣어",
+				"Type" : "bool",
+				"Priority" : 200
+			},
+			"Shot": {
+				"QuestionKR" : "샷 추가는 얼마나 해드릴까요",
+				"ReplyExample" : "샷 필요없어 / 샷 두번",
+				"Type" : "int",
+				"Limit" : 2,
+				"Priority" : 200
+			},
+			"Syrup": {
+				"QuestionKR" : "시럽 넣어드릴까요",
+				"ReplyExample" : "시럽 빼줘 / 시럽 넣어",
+				"Type" : "bool",
+				"Priority" : 200
+			},
+			"Temp": {
+				"QuestionKR" : "어떤 커피로 해드릴까요",
+				"ReplyExample" : "아메리카노 / 에스프레소",
+				"Type" : "str",
+				"Priority" : 300
+			}
+		}
+	}
+}

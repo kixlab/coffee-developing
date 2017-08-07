@@ -1,4 +1,4 @@
-from Stack import Stack, commands
+from .Stack import Stack, commands
 
 import urllib.request
 import urllib.parse
