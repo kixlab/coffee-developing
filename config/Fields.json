@@ -1,10 +1,4 @@
 {
-	"General": {
-		"Explanation": "For general informations",
-		"Fields": {
-			"Name": {}
-		}
-	},
 	"Coffee": {
 		"Explanation": "About coffee ordering",
 		"Fields": {
@@ -43,6 +37,17 @@
 				"ReplyExample" : "아메리카노 / 에스프레소",
 				"Type" : "str",
 				"Priority" : 300
+			}
+		}
+	},
+	"Light": {
+		"Explanation": "About light managing",
+		"Fields": {
+			"Brightness": {
+				"QuestionKR" : "밝기는 어떻게 해드릴까요",
+				"Type" : "int",
+				"Limit" : 5,
+				"Priority" : 200
 			}
 		}
 	}

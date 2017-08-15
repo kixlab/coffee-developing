@@ -3,24 +3,44 @@
 import enum
 
 types = [enum.Enum, int, bool, str] # Allowed types
+OPTIONS = ["QuestionKR", "ReplyExample", "Type", "Limit", "Priority"]
+# Dict elements
+# - QuestionKR
+# - ReplyExample (Optional)
+# - Type (Limited - only elements in list [types] is available)
+# - Limit (Optional, Type limitation)
+# - Priority (Optional, Default = 0)
 
 # TODO : Implement as Bounded Integer, String
 
 class Field:
 	name = ''
-	questionKR = ''
-	__priority = 0 # Default is 0. Should not be changed
-	__type = None
+	__option = dict()
 	__value = None
 	
-	def __init__(self, name, questionKR, typeDef, priority = 0):
-		if not typeDef in types:
-			print('WrongTypeError :', typeDef)
+	# name = Field name
+	# fieldConfig = dict about options
+	def __init__(self, name, fieldConfig):
+		self.name = name
+		self.__option = dict()
+		self.value = None
+		for option in OPTIONS:
+			self.__option[option] = fieldConfig.get(option)
+			# Put even None, and all OPTIONS slots are alive.
+
+	def __str__(self):
+		if self.name == "":
+			return "Invalid Field\n"
 		else:
-			self.name = name
-			self.questionKR = questionKR
-			self.__priority = priority
-			self.__type = typeDef
+			text = "Field Info <" + self.name + ">\n"
+
+			text += "Field options ---\n"
+			for option in OPTIONS:
+				setting = self.__option.get(option)
+				if setting != None:
+					text += option + " : " + str(setting) + "\n"
+
+			return text
 
 	def setValue(self, val):
 		if val == None:
@@ -30,14 +50,22 @@ class Field:
 		else:
 			print('TypeMismatchError : Expected', self.__type, '/ Input', type(val))
 
+	def __getOption(self, code):
+		if self.name == '':
+			print('Empty Field Error - tried to access', code)
+		elif code in OPTIONS:
+			return self.__option.get(code)
+		else:
+			print('Improper option code on Field -', code)
+
 	def getValue(self):
 		return self.__value
 	
 	def getPriority(self):
-		return self.__priority
+		return self.__getOption("Priority")
 
 	def getType(self):
-		return self.__type
+		return self.__getOption("Type")
 	
 	def isFilled(self):
 		return self.__value != None
@@ -45,7 +73,7 @@ class Field:
 	def getStatus(self):
 		return [self.name, str(self.__value)]
 		
-	def getStatus(self):
+	def getStatusStr(self):
 		return self.name + ' = ' + str(self.__value)
 
 	def printStatus(self):

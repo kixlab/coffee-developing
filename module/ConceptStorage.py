@@ -1,29 +1,29 @@
 # -*- coding: utf-8 -*-
 
-import enum
-import uuid
+import json
 
-from .Field import Field
+from .Concept import Concept
 
-
-class Core:
-	uuid = None
-	__fields = []
+class ConceptStorage:
+	storage = dict()
 	
-	def __init__(self, prevLight = None):
-		self.__fields = []
+	# This reading part should be covered with try-catch
+	def __init__(self):
+		f = open("config/Fields.json", 'r', encoding='utf-8')
+		settingJson = json.loads(f.read())
+		keys = list(settingJson.keys()) # Each key in keys become Concept.name
 
-		self.__fields.append(Field.Field('Name', '이름이 어떻게 되나요?', str, 200)) # Currently should not filled.
+		for key in keys:
+			self.storage[key] = Concept(settingJson.get(key), key)
+	
+	def __str__(self):
+		text = "Concepts stored Info ----------\n"
 
-		if prevLight != None:
-			self.uuid = prevLight.uuid
-			for field in prevLight.__fields:
-				if field.getValue() != None:
-					self.setField(['Light', field.name, field.getValue()])
+		for key in list(self.storage.keys()):
+			text += str(self.storage.get(key))
 
-		else:
-			self.uuid = uuid.uuid4()
-			
+		return text
+
 	def getHighestPriorityField(self):
 		highestPriority = -1
 		highestPriorityField = None

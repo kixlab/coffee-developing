@@ -20,3 +20,11 @@ Other note :
 
 Currently, "field-set alert message" is unimplemented.
 User should send one message to use this program. (Because sender id cannot obtained before message receiving...)
+
+C. Test for ConceptStorage
+
+```sh
+$ python3 Test_Concept.py
+```
+
+- Run Test_Concept.py and compare stored status with Fields.json
