@@ -4,7 +4,7 @@ import enum
 import uuid
 
 from .Field import Field
-from .Constants import * # For temporary managing for hot/cold
+from .Commons import * # For temporary managing for hot/cold
 
 class Concept:
 	uuid = None
@@ -57,10 +57,12 @@ class Concept:
 					# When cloning from initial state = Newly inserted from initial state
 					self.uuid = uuid.uuid4()
 				else:
-					self.uuid = prevElem.uuid
-					for field in prevElem.__fields:
-						if field.getValue() != None:
-							self.setField([self.name, field.name, field.getValue()])
+					self.uuid = arg.uuid
+
+				for field in arg.__fields: # Cloning setting. It should work even value is None.
+					self.cloneField(field)
+
+				self.printStatus()
 				return
 			
 		# If setting is properly finished, below part should not be called.
@@ -86,8 +88,14 @@ class Concept:
 
 			return text
 
+	def getName(self):
+		return self.name
+
 	def getExplanation(self):
 		return self.__explanation
+
+	def getFields(self):
+		return self.__fields
 
 	def getHighestPriorityField(self):
 		highestPriority = -1
@@ -104,7 +112,13 @@ class Concept:
 	def isFilled(self):
 		return self.getHighestPriorityField() == None
 
-	def setField(self, entity):
+	def cloneField(self, field): # Clone and input to this Concept.
+		newField = Field(field.getName(), field.getConfig())
+		if field.isFilled():
+			newField.setValue(field.getValue())
+		self.__fields.append(newField)
+
+	def setEntity(self, entity):
 		# Verifying concept type
 		if self.name != entity[0]:
 			print("WrongConceptException : Expected", self.name, ", but obtained", entity[0])
@@ -113,33 +127,13 @@ class Concept:
 		# entity = [Classname, FieldName, Value, Option] - Option is optional
 		for field in self.__fields:
 			if field.name == entity[1]:
-				try:
-					if field.getType() == bool:
-						if (entity[2] == True) or entity[2] == 'Positive' or str(entity[2]).replace(' ','') in cold:
-							field.setValue(True)
-						elif (entity[2] == False) or entity[2] == 'Negative' or str(entity[2]).replace(' ','') in hot: # Manage explicitly because bool('Negative') = True
-							field.setValue(False)
-						else:
-							print("WrongTypeException : Expected", field.getType(), ", but boolean word.")
-					else:
-						field.setValue(field.getType()(entity[2]))
-						field.printStatus()
-					return # Assume same name field is one.
-				except Exception as ex:
-					if field.getType() == int:
-						if entity[2] == 'Zero':
-							field.setValue(0)
-						elif entity[2] == 'One':
-							field.setValue(1)
-						elif entity[2] == 'Two':
-							field.setValue(2)
-						else:
-							print("WrongTypeException : Expected", field.getType(), ", but not 0-2.")
-					else:
-						print("WrongTypeException : Expected", field.getType(), "| Input", type(entity[2]))
+				field.setValue(entity[2])
+				return # No duplicated fields
 
-		# When no fields are matching
-		# TODO : add new field.
+		# When no fields are matching.
+		# Currently, error message printed.
+		print('WrongFieldException @ Concept.setEntity()', str(entity[1]))
+		# TODO(LongTerm) : add new field.
 
 	def getStatus(self):
 		status = []

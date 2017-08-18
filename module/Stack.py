@@ -1,21 +1,25 @@
-from .Coffee import Coffee
+from .Concept import Concept
+from .ConceptStorage import ConceptStorage
 from .LUISconnector import LUISconnector
+from .JSONexport import JSONexport
+from .Commons import *
 
 import re
-
-intentThreshold = 0.1
-commands = ['coffee_service', 'set_field', 'recommend', 'print', 'stack', 'back', 'front']
 
 class Stack():
 	cursor = None
 	stack = None
-	coffeeLUIS = None
+	connectLUIS = None
+	conceptInit = None
+	exportJSON = None
 	__msg = '' # Value for save return message
 
 	def __init__(self):
 		self.cursor = -1
 		self.stack = []
-		self.coffeeLUIS = LUISconnector(2)
+		self.conceptInit = ConceptStorage()
+		self.connectLUIS = LUISconnector(2)
+		self.exportJSON = JSONexport()
 
 	def run(self): # For stand-alone
 		while True:
@@ -30,59 +34,35 @@ class Stack():
 
 		if block[0] in commands:
 			self.run_intent(msg)
-			return
+
 		# Commands end
-
-		resultJson = self.coffeeLUIS.getJson(msg)
-		entities = resultJson.get('entities')
-		self.run_entity(entities)
-
-		if self.__current().isFilled(): # Finished
-			self.__addMsg('커피를 다음과 같이 주문합니다.')
-			self.__addMsg(self.__current().getStatus())
-			return self.__getMsg() # And Return.
+		else:
+			self.connectLUIS.ask(msg)
+			self.set_fields()
 
 		# Moved Recommendation order.
 		if not self.__notStarted():
-			question = self.__current().getHighestPriorityField().printQuestionKR()
+			if self.__current().isFilled(): # Finished
+				self.__addMsg('서비스를 다음과 같이 수행합니다.')
+				self.__addMsg(self.__current().getStatus())
+				self.exportJSON.export(self.__current())
+				self.clear(self.__current().uuid)
+				return self.__getMsg() # And Return.
+
+			question = self.__current().getHighestPriorityField().getQuestionKR()
 			print(question)
 			self.__addMsg(question)
 
 		return self.__getMsg()
 
-	def parseEntity(self, entity):
-		# Return as list/tuple form. [Object, FieldName, Value, others...]
-		result = entity.get('type').split(':')
-		result.append(entity.get('entity'))
-		if '' in result:
-			result.remove('') # To avoid :: case
-
-		# Temporary coverage for shot
-		if result[0] == result[2]: # ['Coffee', 'Shot', 'Coffee', 'Shot', 'Two', '두 번 ']
-			result.remove(result[2])
-			result.remove(result[2]) # [3] goes to [2]
-		return result
-
-	def run_entity(self, entities):
-		current = Coffee(self.__current()) # Including starting Coffee when not started
-
-		print('-- ENTITIES LIST --')
-		for entity in entities:
-			entityPath = self.parseEntity(entity)
-			print(entityPath)
-			# TODO - If first element is not matching, goto lower part
-			if self.getClassName(current) == entityPath[0]:
-				current.setField(entityPath)
-				pass # entityPath[1]
+	def clear(self, uuid):
+		cursor_tmp = 0
+		while cursor_tmp < len(self.stack):
+			if self.stack[cursor_tmp].uuid == uuid:
+				self.stack.remove(self.stack[cursor_tmp])
+				self.cursor -= 1
 			else:
-				# Go back repeatly
-				pass # Currently inimplemented
-
-		print('-- ENTITIES LIST END --')
-		self.stack.append(current)
-		self.cursor_move(1) # TODO : Change
-		print('Current Coffee state :')
-		current.printStatus()
+				cursor_tmp += 1
 
 	def run_intent(self, msg = None, block = None):
 		if msg == None:
@@ -91,88 +71,121 @@ class Stack():
 		if block == None:
 			block = msg.split()
 
-		if self.msgFind(msg, 'coffee_service'):
-			self.service_start() # Starting service by creating new coffee argument
-		elif self.msgFind(msg, 'set_field'):
-			self.set_field(block)
-		elif self.msgFind(msg, 'recommend'):
+		if msgFind(msg, 'start'):
+			if len(block) > 1:
+				self.service_start(block[1])
+			else:
+				self.__errMsg('NotEnoughArgument @ Stack : Command \'start\'')
+
+		elif msgFind(msg, 'coffee_service'): # to cover legacy code
+			self.service_start('Coffee') # Starting service by creating new coffee argument
+
+		elif msgFind(msg, 'set_field'):
+			if len(block) == 4: # ['set_field'] + EntityPath(len=3)
+				self.set_fields([block[1:4]])
+			else:
+				self.__errMsg('NotEnoughArgument @ Stack : Command \'set_field\'')
+
+		elif msgFind(msg, 'recommend'):
 			self.recommend()
-		elif self.msgFind(msg, 'print'):
+		elif msgFind(msg, 'print'):
 			self.print()
-		elif self.msgFind(msg, 'stack'):
+		elif msgFind(msg, 'stack'):
 			self.print_stack()
-		elif self.msgFind(msg, 'back'):
-			self.cursor_move(-1)
-		elif self.msgFind(msg, 'front'):
-			self.cursor_move(1)
-		elif self.msgFind(msg, 'None'):
+		elif msgFind(msg, 'back'):
+			self.__cursorMove(-1)
+		elif msgFind(msg, 'front'):
+			self.__cursorMove(1)
+		elif msgFind(msg, 'None'):
 			print('Error : Incomprehensible order. [None]')
 			return 'Error : Incomprehensible order. [None]'
 
 		else:
 			print(msg, 'is not covered order.')
-			
-	def msgFind(self, msg, keyword):
-		return msg.lower().find(keyword) != -1
-
-	def getClassName(self, obj):
-		# From "<class 'Coffee.Coffee'>" to Coffee
-		return re.split('\'|\.', str(type(obj)))[2]
-		# Split Result : ['<class ', 'Coffee', 'Coffee', '>']
 
 	### Functions for each works
 
-	def service_start(self):
-		self.stack.append(Coffee())
-		self.__addMsg('새 커피를 주문합니다.') # Message for new Coffee
-		self.cursor = len(self.stack)-1 # Automatically move to top
-
-	def set_field(self, block = None):
-		if self.__notStarted():
-			self.service_start()
-
-		if len(block) == 1:
-			print('No arguments - set_field')
-
+	# Target = Keyword
+	def service_start(self, target = initialConceptName):
+		newConcept = self.conceptInit.getConcept(target)
+		if newConcept == None:
+			self.__errMsg('WrongConceptNameError @ Stack')
 		else:
-			current_coffee = Coffee(self.__current())
+			self.stack.append(Concept(newConcept)) # Clone from storage
+			self.__addMsg('새 서비스를 시작합니다.') # Message for new Concept
+			self.cursor = len(self.stack)-1 # Automatically move to top
 
-			arg = ['Coffee']
-			for elem in block[1:]:
-				arg.append(elem)
-				if len(arg) == 3:
-					current_coffee.setField(arg)
-					arg = ['Coffee']
+	def set_fields(self, block = None):
+		if block == None:
+			block = self.connectLUIS.getEntityList()
+		storage = [] # Temporary storage for 
 
-			self.stack.append(current_coffee)
-			self.cursor_move(1) # TODO : Change
-			print('Current Coffee state :')
-			current_coffee.printStatus()
+		for entityPath in block:
+			# TEMPORARY COVERING PARTS
+			# Part 1 : Color --> Light.Color, Location --> Light.Location
+			if entityPath[0] in ["Color", "Location"] :
+				entityPath = ['Light'] + entityPath
+
+			# Check whether Concept name is proper.
+			if self.conceptInit.containConcept(entityPath[0]):
+				target = None
+				for concept in storage:
+					if concept.getName() == entityPath[0]:
+						target = concept
+
+				# When there is no proper concept on storage...
+				if target == None:
+					origin = None # Origin for clone
+					cursor_tmp = self.cursor
+					while cursor_tmp >= 0:
+						if self.stack[cursor_tmp].getName() == entityPath[0]: # When name is matching
+							origin = self.stack[cursor_tmp]
+							break
+						cursor_tmp -= 1
+
+					# When there is no proper concept on both storage and stack...
+					if origin == None:
+						origin = self.conceptInit.getConcept(entityPath[0])
+
+					target = Concept(origin)
+					storage.append(target)
+
+				# Applying entity specs
+				target.setEntity(entityPath)
+
+			else:
+				self.__errMsg('WrongConceptNameError @ Stack.Entity' + str(entityPath[0]))
+
+		for concept in storage:
+			self.stack.append(concept)
+			self.cursor += 1 # TODO : Change
+			print('Updated states :')
+			concept.printStatus()
 
 	def recommend(self):
 		if self.__notStarted():
-			print('Coffee not started - Recommend')
+			print('Service not started - Recommend')
 		else:
 			print('Recommend about...')
 			self.__current().getHighestPriorityField().printQuestion()
 
 	def print(self):
 		if self.__notStarted():
-			print('Coffee not started')
+			print('Service not started')
 		else:
 			self.__current().printStatus()
 
 	def print_stack(self):
 		i = 0
 		print('Cursor on #', self.cursor, sep = '')
-		for coffee in self.stack:
-			print('Coffee #', i, 'Status')
-			coffee.printStatus()
+		for concept in self.stack:
+			print(concept.getName(), '#', i, 'Status')
+			concept.printStatus()
 			i += 1
 
-	def cursor_move(self, d):
+	def __cursorMove(self, d):
 		if self.__notStarted():
-			print('Coffee not started')
+			print('Service not started')
 		elif self.cursor + d < 0 or self.cursor + d >= len(self.stack):
 			print('Moved cursor out of range')
 		else:
@@ -183,14 +196,18 @@ class Stack():
 
 	def __current(self):
 		if self.__notStarted():
-			print('Coffee not started. Create new Coffee')
-			self.service_start()
+			print('Service not started. You need to start service.')
+			return None
 			
 		# TODO : Exception should be managed at here?
 		return self.stack[self.cursor]
 
 	def __addMsg(self, text):
 		self.__msg += str(text) + '\n'
+
+	def __errMsg(self, text = ""):
+		self.__msg += '에러 발생! ' + str(text) + '\n'
+		print(text)
 
 	def __getMsg(self):
 		tmp = self.__msg

@@ -5,6 +5,8 @@
 			"Amount": {
 				"QuestionKR" : "몇 컵 해드릴까요",
 				"Type" : "int",
+				"Min" : 1,
+				"Max" : 3,
 				"Priority" : 200
 			},
 			"Cup_Type": {
@@ -23,7 +25,8 @@
 				"QuestionKR" : "샷 추가는 얼마나 해드릴까요",
 				"ReplyExample" : "샷 필요없어 / 샷 두번",
 				"Type" : "int",
-				"Limit" : 2,
+				"Min" : 0,
+				"Max" : 2,
 				"Priority" : 200
 			},
 			"Syrup": {
@@ -33,6 +36,12 @@
 				"Priority" : 200
 			},
 			"Temp": {
+				"QuestionKR" : "따뜻하게 해드릴까요",
+				"ReplyExample" : "따뜻하게 / 차갑게",
+				"Type" : "bool",
+				"Priority" : 200
+			},
+			"Type": {
 				"QuestionKR" : "어떤 커피로 해드릴까요",
 				"ReplyExample" : "아메리카노 / 에스프레소",
 				"Type" : "str",
@@ -43,10 +52,14 @@
 	"Light": {
 		"Explanation": "About light managing",
 		"Fields": {
-			"Brightness": {
-				"QuestionKR" : "밝기는 어떻게 해드릴까요",
-				"Type" : "int",
-				"Limit" : 5,
+			"Location": {
+				"QuestionKR" : "어느 불을 켜 드릴까요",
+				"Type" : "str",
+				"Priority" : 200
+			},
+			"Color": {
+				"QuestionKR" : "조명 색조는 어떻게 해드릴까요",
+				"Type" : "str",
 				"Priority" : 200
 			}
 		}
