@@ -53,7 +53,8 @@ class LUISconnector:
 				if len(path) >= 3:
 					if path[0] == path[2]:
 						path.remove(path[2])
-						path.remove(path[2]) # [3] goes to [2]
+					if path[1] == path[2]: # [3] goes to [2], so compare with [1] and [2]
+						path.remove(path[2])
 
 				# If resolution-values is on, insert it
 				if entityJson.get('resolution') != None:
