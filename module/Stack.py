@@ -12,6 +12,7 @@ class Stack():
 	connectLUIS = None
 	conceptInit = None
 	exportJSON = None
+	__hasExported = False
 	__msg = '' # Value for save return message
 
 	def __init__(self):
@@ -26,11 +27,18 @@ class Stack():
 			self.react()
 
 	def react(self, msg = None):
+		self.__hasExported = False
+
 		if msg == None: # For console [ MainStack.py ]
 			msg = input('> QUERY : ')
 
 		# Command for debugging...
 		block = msg.split()
+
+		if len(block) == 0:
+			self.__errMsg('NoInputMessage')
+			self.__getMsg() # Just empty message slot.
+			return
 
 		if block[0] in commands:
 			self.run_intent(msg)
@@ -41,11 +49,13 @@ class Stack():
 			self.set_fields()
 
 		# Moved Recommendation order.
+
 		if not self.__notStarted():
 			if self.__current().isFilled(): # Finished
 				self.__addMsg('서비스를 다음과 같이 수행합니다.')
 				self.__addMsg(self.__current().getStatus())
 				self.exportJSON.export(self.__current())
+				self.__hasExported = True
 				self.clear(self.__current().uuid)
 				return self.__getMsg() # And Return.
 
@@ -118,13 +128,17 @@ class Stack():
 	def set_fields(self, block = None):
 		if block == None:
 			block = self.connectLUIS.getEntityList()
-		storage = [] # Temporary storage for 
+		storage = [] # Temporary storage
 
 		for entityPath in block:
 			# TEMPORARY COVERING PARTS
-			# Part 1 : Color --> Light.Color, Location --> Light.Location
+			# Part 1-1 : Color --> Light.Color, Location --> Light.Location
 			if entityPath[0] in ["Color", "Location"] :
 				entityPath = ['Light'] + entityPath
+
+			# Part 1-2 : [Light_sat.Light_sat --> Light.Sat]
+			if entityPath[0] == "Light_Sat":
+				entityPath = ['Light', 'Sat'] + entityPath[2:]
 
 			# Check whether Concept name is proper.
 			if self.conceptInit.containConcept(entityPath[0]):
@@ -154,7 +168,8 @@ class Stack():
 				target.setEntity(entityPath)
 
 			else:
-				self.__errMsg('WrongConceptNameError @ Stack.Entity' + str(entityPath[0]))
+				print(entityPath)
+				self.__errMsg('WrongConceptNameError @ Stack.Entity ' + str(entityPath[0]))
 
 		for concept in storage:
 			self.stack.append(concept)
@@ -213,5 +228,14 @@ class Stack():
 		tmp = self.__msg
 		self.__msg = ''
 		return tmp
+
+	def __str__(self):
+		result = 'Stack information'
+		for elem in self.stack:
+			result += '\n' + str(elem)
+		return result
+
+	def needExport(self):
+		return self.__hasExported
 
 	# TODO IDEA : manage cursor == -1 case with other procedure

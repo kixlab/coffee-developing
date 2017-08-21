@@ -107,7 +107,7 @@ class Field:
 		return self.__getOption("Max")
 
 	def getQuestionKR(self):
-		return self.__getOption("QuestionKR")
+		return str(self.__getOption("QuestionKR")) + "?"
 	
 	def isFilled(self):
 		return self.__value != None

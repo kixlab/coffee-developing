@@ -19,7 +19,7 @@ class JSONexport:
 		elem['fields'] = fields
 		context.append(elem)
 		overall['context'] = context
-		f.write(json.dumps(overall, indent=2))
+		f.write(json.dumps(overall, indent=2, ensure_ascii=False))
 		f.close()
 
 	def fieldToDict(self, name, field):

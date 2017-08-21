@@ -36,7 +36,7 @@ class LUISconnector:
 			return []
 		else:
 			entityList = []
-			
+
 			for entityJson in self.resultJson.get('entities'):
 				path = entityJson.get('type').split(':')
 
@@ -52,9 +52,9 @@ class LUISconnector:
 				# 3. Covering... ['Coffee', 'Shot', 'Coffee', 'Shot', 'Two', '두 번 ']
 				if len(path) >= 3:
 					if path[0] == path[2]:
-						path.remove(path[2])
+						path = path[:2] + path[3:]
 					if path[1] == path[2]: # [3] goes to [2], so compare with [1] and [2]
-						path.remove(path[2])
+						path = path[:2] + path[3:]
 
 				# If resolution-values is on, insert it
 				if entityJson.get('resolution') != None:

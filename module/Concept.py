@@ -75,12 +75,12 @@ class Concept:
 		if self.name == "":
 			return "Invalid Concept\n"
 		else:
-			text = "Concept Info <" + self.name + ">\n"
+			text = "Concept Info <" + str(self.name) + ">\n"
 
 			if self.uuid != None:
-				text += "UUID : " + self.uuid + "\n"
+				text += "UUID : " + str(self.uuid) + "\n"
 
-			text += "Explanation : " + self.__explanation + "\n"
+			text += "Explanation : " + str(self.__explanation) + "\n"
 
 			text += "Containing fields ---\n"
 			for field in self.__fields:

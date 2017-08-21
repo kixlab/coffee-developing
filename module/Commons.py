@@ -38,8 +38,8 @@ OPTIONS = ["QuestionKR", "ReplyExample", "Type", "Min", "Max", "Priority"]
 
 # True-False decision storage
 
-goTrue = [True, 'True', 'Hot', 'To_Go', 'Positive']
-goFalse = [False, 'False', 'Cold', 'In_House', 'Negative']
+goTrue = [True, 'True', 'Hot', 'To_Go', 'Positive', 'On', 'High']
+goFalse = [False, 'False', 'Cold', 'In_House', 'Negative', 'Off', 'Low']
 
 # Number code. Call by coord
 goNum = ['Zero', 'One', 'Two', 'Three']

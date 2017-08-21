@@ -2,13 +2,6 @@
 	"Coffee": {
 		"Explanation": "About coffee ordering",
 		"Fields": {
-			"Amount": {
-				"QuestionKR" : "몇 컵 해드릴까요",
-				"Type" : "int",
-				"Min" : 1,
-				"Max" : 3,
-				"Priority" : 200
-			},
 			"Cup_Type": {
 				"QuestionKR" : "포장해 드릴까요",
 				"ReplyExample" : "먹고갈꺼에요 / 들고갈게요",
@@ -60,6 +53,16 @@
 			"Color": {
 				"QuestionKR" : "조명 색조는 어떻게 해드릴까요",
 				"Type" : "str",
+				"Priority" : 200
+			},
+			"Power": {
+				"QuestionKR" : "불 켜드릴까요",
+				"Type" : "bool",
+				"Priority" : 200
+			},
+			"Sat": {
+				"QuestionKR" : "밝게 해드릴까요",
+				"Type" : "bool",
 				"Priority" : 200
 			}
 		}
