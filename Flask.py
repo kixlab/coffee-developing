@@ -26,6 +26,8 @@ def response():
 		stack = Stack()
 		userStack[userID] = stack
 
+	if text == None:
+		text = ''
 	response = stack.react(text)
 
 	result = None
