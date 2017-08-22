@@ -50,8 +50,11 @@ class Stack():
 			self.set_fields()
 
 		# Moved Recommendation order.
+		if self.__notStarted():
+			self.__addMsg("커피 주문이나 조명 설정이 가능합니다.")
+			return self.__getMsg()
 
-		if not self.__notStarted():
+		else:
 			if self.__current().isFilled(): # Finished
 				self.__addMsg('서비스를 다음과 같이 수행합니다.')
 				self.__addMsg(self.__current().getStatus())

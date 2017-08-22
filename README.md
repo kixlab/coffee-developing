@@ -28,3 +28,11 @@ $ python3 Test_Concept.py
 ```
 
 - Run Test_Concept.py and compare stored status with Fields.json
+
+D. Running via Flask
+
+Should install Flask.
+
+```sh
+$ FLASK_APP=Flask.py flask run --host=0.0.0.0
+```
