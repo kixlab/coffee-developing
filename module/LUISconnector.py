@@ -24,7 +24,9 @@ class LUISconnector:
 		print('Query Message :', query)
 
 		url = urllib.request.urlopen(self.__link + urllib.parse.quote(query))
-		self.resultJson = json.loads(url.read())
+		result = url.read()
+		print(result)
+		self.resultJson = json.loads(result.decode('utf-8'))
 		
 	def getJson(self):
 		return self.resultJson
