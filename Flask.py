@@ -36,9 +36,12 @@ def response():
 	resp = requests.post('http://143.248.96.24/message/telebot', json=createResponse(response, userID, 0, 0))
 	
 	print('Response message :', response)
-	print('Sent message :', resp.text)
 
 	return str(result)
+
+@app.route("/ping")
+def ping():
+	return "Connection Test : Succeeded"
 
 def createResponse(msg, rid, mmstep, mmstep_qna):
 	response = dict()
@@ -47,7 +50,3 @@ def createResponse(msg, rid, mmstep, mmstep_qna):
 	response['mmstep'] = mmstep
 	response['mmstep_qna'] = mmstep_qna
 	return response
-
-if __name__==“__main__“:
-    port = int(os.environ.get(‘PORT’, 5000))
-    app.run(host=‘0.0.0.0’,port=port,threaded=True)

@@ -21,6 +21,7 @@ class Stack():
 		self.conceptInit = ConceptStorage()
 		self.connectLUIS = LUISconnector(2)
 		self.exportJSON = JSONexport()
+		self.__msg = ''
 
 	def run(self): # For stand-alone
 		while True:
