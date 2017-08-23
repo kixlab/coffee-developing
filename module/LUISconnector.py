@@ -47,10 +47,6 @@ class LUISconnector:
 				if '' in path:
 					path.remove('')
 
-				# 2. Currently, not managing 'Boolean::Boolean:Positive' cases...
-				if path[0] == 'Boolean':
-					continue
-
 				# 3. Covering... ['Coffee', 'Shot', 'Coffee', 'Shot', 'Two', '두 번 ']
 				if len(path) >= 3:
 					if path[0] == path[2]:

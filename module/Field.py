@@ -108,6 +108,9 @@ class Field:
 
 	def getQuestionKR(self):
 		return str(self.__getOption("QuestionKR")) + "?"
+
+	def getNameKR(self):
+		return str(self.__getOption("NameKR"))
 	
 	def isFilled(self):
 		return self.__value != None

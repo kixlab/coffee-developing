@@ -34,7 +34,7 @@ entityThreshold = 0.1
 # Options for Field.py
 
 types = [enum.Enum, int, bool, str] # Allowed types
-OPTIONS = ["QuestionKR", "ReplyExample", "Type", "Min", "Max", "Priority"]
+OPTIONS = ["NameKR", "QuestionKR", "ReplyExample", "Type", "Min", "Max", "Priority"]
 
 # True-False decision storage
 

@@ -3,18 +3,21 @@
 		"Explanation": "About coffee ordering",
 		"Fields": {
 			"Cup_Type": {
+				"NameKR" : "포장",
 				"QuestionKR" : "포장해 드릴까요",
 				"ReplyExample" : "먹고갈꺼에요 / 들고갈게요",
 				"Type" : "str",
 				"Priority" : 200
 			},
 			"Milk": {
+				"NameKR" : "우유",
 				"QuestionKR" : "우유 넣어드릴까요",
 				"ReplyExample" : "우유 빼줘 / 우유 넣어",
 				"Type" : "bool",
 				"Priority" : 200
 			},
 			"Shot": {
+				"NameKR" : "샷 추가",
 				"QuestionKR" : "샷 추가는 얼마나 해드릴까요",
 				"ReplyExample" : "샷 필요없어 / 샷 두번",
 				"Type" : "int",
@@ -23,18 +26,21 @@
 				"Priority" : 200
 			},
 			"Syrup": {
+				"NameKR" : "시럽",
 				"QuestionKR" : "시럽 넣어드릴까요",
 				"ReplyExample" : "시럽 빼줘 / 시럽 넣어",
 				"Type" : "bool",
 				"Priority" : 200
 			},
 			"Temp": {
+				"NameKR" : "따뜻함",
 				"QuestionKR" : "따뜻하게 해드릴까요",
 				"ReplyExample" : "따뜻하게 / 차갑게",
 				"Type" : "bool",
 				"Priority" : 200
 			},
 			"Type": {
+				"NameKR" : "커피종류",
 				"QuestionKR" : "어떤 커피로 해드릴까요",
 				"ReplyExample" : "아메리카노 / 에스프레소",
 				"Type" : "str",
@@ -46,21 +52,25 @@
 		"Explanation": "About light managing",
 		"Fields": {
 			"Location": {
+				"NameKR" : "불 위치",
 				"QuestionKR" : "어느 불을 켜 드릴까요",
 				"Type" : "str",
 				"Priority" : 200
 			},
 			"Color": {
+				"NameKR" : "색조",
 				"QuestionKR" : "조명 색조는 어떻게 해드릴까요",
 				"Type" : "str",
 				"Priority" : 200
 			},
 			"Power": {
+				"NameKR" : "불",
 				"QuestionKR" : "불 켜드릴까요",
 				"Type" : "bool",
 				"Priority" : 200
 			},
 			"Sat": {
+				"NameKR" : "밝기",
 				"QuestionKR" : "밝게 해드릴까요",
 				"Type" : "bool",
 				"Priority" : 200

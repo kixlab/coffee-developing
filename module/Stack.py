@@ -41,13 +41,25 @@ class Stack():
 			self.__getMsg() # Just empty message slot.
 			return
 
+		print(block[0])
 		if block[0] in commands:
 			self.run_intent(msg)
-
 		# Commands end
+
 		else:
 			self.connectLUIS.ask(msg)
-			self.set_fields()
+			block = self.connectLUIS.getEntityList()
+
+			# Empty entity coverage --> Retry with attaching current highest-priority field
+			if len(block) == 0:
+				if not self.__notStarted(): # Not empty stack
+					chpf = self.__current().getHighestPriorityField()
+					if chpf != None: # When active
+						# Re-ask with attaching Fieldname(KR)
+						self.connectLUIS.ask(str(chpf.getNameKR()) + ' ' + msg) # Cover for None(It should not happen, but...)
+						block = self.connectLUIS.getEntityList()
+
+			self.set_fields(block)
 
 		# Moved Recommendation order.
 		if self.__notStarted():
@@ -131,7 +143,8 @@ class Stack():
 
 	def set_fields(self, block = None):
 		if block == None:
-			block = self.connectLUIS.getEntityList()
+			block = self.connectLUIS.getEntityList() # Cover for exception...maybe...
+
 		storage = [] # Temporary storage
 
 		for entityPath in block:
@@ -143,6 +156,26 @@ class Stack():
 			# Part 1-2 : [Light_sat.Light_sat --> Light.Sat]
 			if entityPath[0] == "Light_Sat":
 				entityPath = ['Light', 'Sat'] + entityPath[2:]
+
+			# Part 1-3 : Cover for Boolean::Boolean:Positive/Negative
+			if entityPath[0] == 'Boolean' and entityPath[1] == 'Boolean':
+				if not self.__notStarted(): # Not empty stack
+					chpf = self.__current().getHighestPriorityField()
+					if chpf != None: # When active
+						if chpf.getType() == 'bool': # When type is bool
+							entityPath[0] = self.__current().getName()
+							entityPath[1] = chpf.getName()
+
+						# Ad-Hoc : Cover for take-out
+						elif chpf.getName() == 'Cup_Type':
+							entityPath[0] = self.__current().getName()
+							entityPath[1] = chpf.getName()
+							if entityPath[2] == 'Positive':
+								entityPath[2] = 'To_Go'
+							elif entityPath[2] == 'Negative':
+								entityPath[2] = 'In_House'
+							else:
+								pass # ERROR. Boolean:Boolean:???
 
 			# Check whether Concept name is proper.
 			if self.conceptInit.containConcept(entityPath[0]):
